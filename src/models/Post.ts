@@ -4,7 +4,7 @@ export interface PostSchema {
   userId: string;
   content: string;
   img: string;
-  likes: string[];
+  likes: { userId: string }[];
   comments: { userId: string; text: string }[];
 }
 
@@ -20,7 +20,7 @@ export const postSchema = new mongoose.Schema<PostSchema>({
     type: String,
   },
   likes: {
-    type: [String],
+    type: [{ userId: String }],
     default: [],
   },
   comments: {

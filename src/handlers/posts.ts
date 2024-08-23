@@ -50,3 +50,41 @@ export const getPosts: RequestHandler = async (req, res, next) => {
     console.error(err);
   }
 };
+
+export const addLikeToPost = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { postId } = req.params;
+    const userLikedId = req.auth.userId;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    console.log(post);
+
+    const existingLike = post.likes.find((item) => item.userId === userLikedId);
+
+    console.log(existingLike);
+
+    if (existingLike) {
+      post.likes = post.likes.filter((item) => item.userId !== userLikedId);
+    } else {
+      post.likes.push({ userId: userLikedId });
+    }
+
+    await post.save();
+
+    const allPosts = await Post.find();
+
+    res.status(201).json(allPosts);
+  } catch (error) {
+    // Pass the error to the error-handling middleware
+    next(error);
+  }
+};
