@@ -1,7 +1,7 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import Post from "../models/Post";
 
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   auth: {
     userId: string;
   };
