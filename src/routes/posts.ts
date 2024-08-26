@@ -1,5 +1,11 @@
 import { RequestHandler, Router } from "express";
-import { addLikeToPost, createPost, getPosts } from "../handlers/posts";
+import {
+  addLikeToPost,
+  addNewComment,
+  createPost,
+  getPostComments,
+  getPosts,
+} from "../handlers/posts";
 import authMiddleware from "../middlewares/auth";
 
 const express = require("express");
@@ -12,5 +18,11 @@ router.post(
   authMiddleware,
   addLikeToPost as unknown as RequestHandler
 );
+router.post(
+  "/comment/:postId",
+  authMiddleware,
+  addNewComment as unknown as RequestHandler
+);
+router.get("/comment/:postId", getPostComments);
 
 module.exports = router;

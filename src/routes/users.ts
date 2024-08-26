@@ -1,5 +1,5 @@
 import { RequestHandler, Router } from "express";
-import { getSessionUser, getUsers } from "../handlers/users";
+import { getSessionUser, getSingleUser, getUsers } from "../handlers/users";
 import authMiddleware from "../middlewares/auth";
 
 const express = require("express");
@@ -11,5 +11,6 @@ router.get(
   authMiddleware,
   getSessionUser as unknown as RequestHandler
 );
+router.get("/:userId", getSingleUser);
 
 module.exports = router;

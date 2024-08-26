@@ -27,3 +27,19 @@ export const getSessionUser = async (
     console.error(err);
   }
 };
+
+export const getSingleUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = req.params;
+
+    const userData = await User.findById(userId);
+
+    res.status(200).json(userData);
+  } catch (err) {
+    console.error(err);
+  }
+};

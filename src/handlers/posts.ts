@@ -88,3 +88,51 @@ export const addLikeToPost = async (
     next(error);
   }
 };
+
+export const addNewComment = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    console.log(req.body);
+
+    const { postId } = req.params;
+    const userCommentId = req.auth.userId;
+    const { comment } = req.body;
+
+    if (!comment) {
+      return res
+        .status(400)
+        .json({ message: "There is no content in your comment." });
+    }
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    post.comments.push({ userId: userCommentId, text: comment });
+
+    await post.save();
+
+    res.status(201).json(post.comments);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPostComments: RequestHandler = async (req, res, next) => {
+  try {
+    const { postId } = req.params;
+
+    const selectedPost = await Post.findById(postId);
+
+    if (selectedPost) {
+      res.status(200).json(selectedPost.comments);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
