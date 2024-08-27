@@ -6,6 +6,7 @@ export interface UserSchema {
   email: string;
   password: string;
   avatar: string;
+  banner: string;
   userPosts: string[];
   likedPosts: string[];
   userEvents: string[];
@@ -31,6 +32,9 @@ const userSchema = new mongoose.Schema<UserSchema>({
     required: true,
   },
   avatar: {
+    type: String,
+  },
+  banner: {
     type: String,
   },
   userPosts: {

@@ -1,5 +1,6 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import Post from "../models/Post";
+import User from "../models/User";
 
 export interface AuthenticatedRequest extends Request {
   auth: {
@@ -59,6 +60,7 @@ export const addLikeToPost = async (
   try {
     const { postId } = req.params;
     const userLikedId = req.auth.userId;
+    const user = await User.findById(userLikedId);
 
     const post = await Post.findById(postId);
 
@@ -66,18 +68,19 @@ export const addLikeToPost = async (
       return res.status(404).json({ message: "Post not found" });
     }
 
-    console.log(post);
-
     const existingLike = post.likes.find((item) => item.userId === userLikedId);
-
-    console.log(existingLike);
 
     if (existingLike) {
       post.likes = post.likes.filter((item) => item.userId !== userLikedId);
+      user?.likedPosts = user?.likedPosts.filter((item) => item !== postId);
     } else {
       post.likes.push({ userId: userLikedId });
+      user?.likedPosts.push(postId);
     }
 
+    console.log("Liked posts", user?.likedPosts);
+
+    await user?.save();
     await post.save();
 
     const allPosts = await Post.find();

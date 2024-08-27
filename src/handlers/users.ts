@@ -35,8 +35,53 @@ export const getSingleUser = async (
 ) => {
   try {
     const { userId } = req.params;
-
     const userData = await User.findById(userId);
+
+    res.status(200).json(userData);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const changeUserAvatar = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const sessionUserId = req.auth.userId;
+    const { img } = req.body;
+
+    const userData = await User.findById(sessionUserId);
+
+    if (userData) {
+      userData.avatar = img;
+    }
+
+    await userData?.save();
+
+    res.status(200).json(userData);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const changeUserBanner = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const sessionUserId = req.auth.userId;
+    const { img } = req.body;
+
+    const userData = await User.findById(sessionUserId);
+
+    if (userData) {
+      userData.banner = img;
+    }
+
+    await userData?.save();
 
     res.status(200).json(userData);
   } catch (err) {
