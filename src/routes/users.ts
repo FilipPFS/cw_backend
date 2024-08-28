@@ -2,6 +2,7 @@ import { RequestHandler, Router } from "express";
 import {
   changeUserAvatar,
   changeUserBanner,
+  changeUserInfos,
   getSessionUser,
   getSingleUser,
   getUsers,
@@ -27,6 +28,11 @@ router.post(
   "/banner",
   authMiddleware,
   changeUserBanner as unknown as RequestHandler
+);
+router.put(
+  "/personal-infos",
+  authMiddleware,
+  changeUserInfos as unknown as RequestHandler
 );
 
 module.exports = router;

@@ -88,3 +88,28 @@ export const changeUserBanner = async (
     console.error(err);
   }
 };
+
+export const changeUserInfos = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const sessionUserId = req.auth.userId;
+    const { firstName, lastName, description } = req.body;
+
+    const userData = await User.findById(sessionUserId);
+
+    if (userData) {
+      (userData.firstName = firstName),
+        (userData.lastName = lastName),
+        (userData.description = description);
+    }
+
+    await userData?.save();
+
+    res.status(200).json(userData);
+  } catch (err) {
+    console.error(err);
+  }
+};
