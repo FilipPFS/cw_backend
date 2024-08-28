@@ -8,6 +8,7 @@ import {
   getUsers,
 } from "../handlers/users";
 import authMiddleware from "../middlewares/auth";
+import { deletePost } from "../handlers/posts";
 
 const express = require("express");
 const router: Router = express.Router();

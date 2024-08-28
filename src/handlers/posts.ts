@@ -1,6 +1,8 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import Post from "../models/Post";
 import User from "../models/User";
+import { log } from "console";
+import mongoose from "mongoose";
 
 export interface AuthenticatedRequest extends Request {
   auth: {
@@ -135,6 +137,103 @@ export const getPostComments: RequestHandler = async (req, res, next) => {
     if (selectedPost) {
       res.status(200).json(selectedPost.comments);
     }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const getUserPosts: RequestHandler = async (req, res, next) => {
+  console.log("executing the function");
+
+  try {
+    const { userId } = req.params;
+
+    const userPosts = await Post.find({ userId: userId });
+
+    if (userPosts) {
+      res.status(200).json(userPosts);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const getSessionPosts = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  console.log("executing the function 2 times ago");
+
+  try {
+    console.log("entring the try block");
+
+    const userId = req.auth.userId;
+
+    console.log("executing here");
+    console.log(userId);
+
+    const userData = await Post.find({ userId: userId });
+
+    console.log(userData);
+
+    res.status(200).json(userData);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const getPostsByIds = async (postIds: string[]) => {
+  // Ensure postIds are valid MongoDB ObjectIds
+  const objectIds = postIds.map((id) => new mongoose.Types.ObjectId(id));
+
+  // Fetch posts from the database
+  return Post.find({ _id: { $in: objectIds } }).exec();
+};
+
+export const getLikedPosts = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.auth.userId; // Adjust according to your request object
+    const user = await User.findById(userId); // Fetch the user from the database
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const likedPostIds = user.likedPosts; // Assuming this is an array of strings (post IDs)
+
+    if (!likedPostIds || likedPostIds.length === 0) {
+      return res.status(200).json([]); // Return an empty array if no liked posts
+    }
+
+    // Get posts by IDs
+    const likedPosts = await getPostsByIds(likedPostIds);
+
+    res.status(200).json(likedPosts);
+  } catch (error) {
+    console.error("Error fetching liked posts:", error);
+    next(error);
+  }
+};
+
+export const deletePost = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.auth.userId;
+
+    await Post.findByIdAndDelete(postId);
+
+    const posts = await Post.find({ userId: userId });
+
+    res.status(200).json(posts);
   } catch (err) {
     console.error(err);
   }
