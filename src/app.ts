@@ -14,6 +14,7 @@ const authRoutes = require("./routes/auth");
 const postRoutes = require("./routes/posts");
 const userRoutes = require("./routes/users");
 const uploadRoutes = require("./routes/upload");
+const messageRoutes = require("./routes/messages");
 require("dotenv").config();
 
 app.use(cors());
@@ -29,6 +30,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/messages", messageRoutes);
 app.use("/images", express.static(path.join(__dirname, "../images")));
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
