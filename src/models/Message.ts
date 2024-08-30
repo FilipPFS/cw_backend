@@ -4,7 +4,7 @@ export interface MessageSchema {
   senderId: string;
   receiverId: string;
   content: string;
-  timestamp: Date;
+  date: Date;
 }
 
 export const messageSchema = new mongoose.Schema<MessageSchema>({
@@ -20,7 +20,7 @@ export const messageSchema = new mongoose.Schema<MessageSchema>({
     type: String,
     required: true,
   },
-  timestamp: { type: Date, default: Date.now },
+  date: { type: Date, default: Date.now },
 });
 
 const Message = mongoose.model<MessageSchema>("Message", messageSchema);

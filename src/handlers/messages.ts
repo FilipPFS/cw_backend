@@ -8,6 +8,16 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
+interface Message {
+  senderId: string;
+  receiverId: string;
+  content: string;
+}
+
+type GroupedMessages = {
+  [key: string]: Message[];
+};
+
 export const sendMessage = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -28,6 +38,7 @@ export const sendMessage = async (
       senderId,
       receiverId,
       content,
+      date: new Date(),
     });
 
     await newMessage.save();
@@ -62,6 +73,67 @@ export const getMessages = async (
     });
 
     res.status(201).json(chat);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUserMessages = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.auth.userId;
+
+    const messages: Message[] = await Message.find({
+      $or: [{ senderId: userId }, { receiverId: userId }],
+    });
+
+    const groupedMessages: GroupedMessages = {};
+
+    messages.forEach((message) => {
+      const key = [message.senderId, message.receiverId].sort().join("_");
+
+      if (!groupedMessages[key]) {
+        groupedMessages[key] = [];
+      }
+
+      groupedMessages[key].push(message);
+    });
+
+    res.status(200).json(groupedMessages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const deleteMessage = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = req.params;
+    const { messageId } = req.params;
+    const sessionId = req.auth.userId;
+
+    const message = await Message.findById(messageId);
+
+    if (message?.senderId !== sessionId) {
+      res.status(403).json("You can't delete messages from other users.");
+    } else {
+      await Message.findByIdAndDelete(messageId);
+    }
+
+    const chat = await Message.find({
+      $or: [
+        { receiverId: userId, senderId: sessionId },
+        { receiverId: sessionId, senderId: userId },
+      ],
+    });
+
+    res.status(200).json(chat);
   } catch (error) {
     next(error);
   }
