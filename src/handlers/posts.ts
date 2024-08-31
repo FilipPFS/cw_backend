@@ -74,7 +74,9 @@ export const addLikeToPost = async (
 
     if (existingLike) {
       post.likes = post.likes.filter((item) => item.userId !== userLikedId);
-      user?.likedPosts = user?.likedPosts.filter((item) => item !== postId);
+      if (user) {
+        user.likedPosts = user.likedPosts.filter((item) => item !== postId);
+      }
     } else {
       post.likes.push({ userId: userLikedId });
       user?.likedPosts.push(postId);
@@ -87,9 +89,12 @@ export const addLikeToPost = async (
 
     const allPosts = await Post.find();
 
-    res.status(201).json(allPosts);
+    const likedPostIds = user!.likedPosts;
+
+    const likedPosts = await getPostsByIds(likedPostIds);
+
+    res.status(201).json({ posts: allPosts, liked: likedPosts });
   } catch (error) {
-    // Pass the error to the error-handling middleware
     next(error);
   }
 };
