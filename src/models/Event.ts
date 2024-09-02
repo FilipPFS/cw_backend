@@ -5,7 +5,7 @@ export interface EventSchema {
   title: string;
   description: string;
   coverImg: string;
-  participants: [string];
+  participants: { userId: string }[];
   createdAt: Date;
 }
 
@@ -25,7 +25,7 @@ export const eventSchema = new mongoose.Schema<EventSchema>({
     type: String,
   },
   participants: {
-    type: [String],
+    type: [{ userId: String }],
     default: [],
   },
   createdAt: { type: Date, default: Date.now },

@@ -4,6 +4,7 @@ import {
   deleteMyEvent,
   getEvents,
   getUserEvent,
+  subToEvent,
 } from "../handlers/event";
 import authMiddleware from "../middlewares/auth";
 
@@ -11,6 +12,11 @@ const express = require("express");
 const router: Router = express.Router();
 
 router.post("/", authMiddleware, createEvent as unknown as RequestHandler);
+router.post(
+  "/like/:eventId",
+  authMiddleware,
+  subToEvent as unknown as RequestHandler
+);
 router.get("/", getEvents);
 router.get(
   "/session",

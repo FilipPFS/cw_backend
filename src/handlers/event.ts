@@ -90,3 +90,45 @@ export const deleteMyEvent = async (
     next(error);
   }
 };
+
+export const subToEvent = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { eventId } = req.params;
+
+    const event = await Event.findById(eventId);
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    if (event.hostId === req.auth.userId) {
+      return res
+        .status(404)
+        .json({ message: "You can't sub to your own event." });
+    }
+
+    const existinSub = event.participants.find(
+      (event) => event.userId === req.auth.userId
+    );
+
+    if (existinSub) {
+      event.participants = event.participants.filter(
+        (event) => event.userId !== req.auth.userId
+      );
+    } else {
+      event.participants.push({ userId: req.auth.userId });
+    }
+
+    await event.save();
+
+    const events = await Event.find();
+
+    res.status(200).json(events);
+  } catch (error) {
+    next(error);
+  }
+};
