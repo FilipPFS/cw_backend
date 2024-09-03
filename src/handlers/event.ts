@@ -41,14 +41,25 @@ export const createEvent = async (
 };
 
 export const getEvents = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
+    const userId = req.auth.userId;
+
+    // Fetch all events
     const events = await Event.find();
 
-    res.status(200).json(events);
+    // Split events into two arrays: those hosted by the user and those not
+    const hostedEvents = events.filter((event) => event.hostId === userId);
+    const otherEvents = events.filter((event) => event.hostId !== userId);
+
+    // Combine the arrays, prioritizing the hosted events
+    const sortedEvents = [...hostedEvents, ...otherEvents];
+
+    // Send the sorted events as the response
+    res.status(200).json(sortedEvents);
   } catch (error) {
     next(error);
   }
@@ -127,7 +138,16 @@ export const subToEvent = async (
 
     const events = await Event.find();
 
-    res.status(200).json(events);
+    const hostedEvents = events.filter(
+      (event) => event.hostId === req.auth.userId
+    );
+    const otherEvents = events.filter(
+      (event) => event.hostId !== req.auth.userId
+    );
+
+    const sortedEvents = [...hostedEvents, ...otherEvents];
+
+    res.status(200).json(sortedEvents);
   } catch (error) {
     next(error);
   }

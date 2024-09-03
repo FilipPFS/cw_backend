@@ -17,7 +17,7 @@ router.post(
   authMiddleware,
   subToEvent as unknown as RequestHandler
 );
-router.get("/", getEvents);
+router.get("/", authMiddleware, getEvents as unknown as RequestHandler);
 router.get(
   "/session",
   authMiddleware,
