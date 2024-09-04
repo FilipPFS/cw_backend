@@ -3,7 +3,7 @@ import {
   createEvent,
   deleteMyEvent,
   getEvents,
-  getUserEvent,
+  getUserEvents,
   subToEvent,
 } from "../handlers/event";
 import authMiddleware from "../middlewares/auth";
@@ -21,7 +21,7 @@ router.get("/", authMiddleware, getEvents as unknown as RequestHandler);
 router.get(
   "/session",
   authMiddleware,
-  getUserEvent as unknown as RequestHandler
+  getUserEvents as unknown as RequestHandler
 );
 router.delete(
   "/:eventId",

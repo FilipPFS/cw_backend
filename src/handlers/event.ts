@@ -47,33 +47,32 @@ export const getEvents = async (
 ) => {
   try {
     const userId = req.auth.userId;
-
-    // Fetch all events
     const events = await Event.find();
 
-    // Split events into two arrays: those hosted by the user and those not
     const hostedEvents = events.filter((event) => event.hostId === userId);
     const otherEvents = events.filter((event) => event.hostId !== userId);
 
-    // Combine the arrays, prioritizing the hosted events
     const sortedEvents = [...hostedEvents, ...otherEvents];
 
-    // Send the sorted events as the response
     res.status(200).json(sortedEvents);
   } catch (error) {
     next(error);
   }
 };
 
-export const getUserEvent = async (
+export const getUserEvents = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const userEvents = await Event.find({ hostId: req.auth.userId });
+    const hostedEvents = await Event.find({ hostId: req.auth.userId });
 
-    res.status(200).json(userEvents);
+    const participantEvents = await Event.find({
+      participants: { $elemMatch: { userId: req.auth.userId } },
+    });
+
+    res.status(200).json({ hostedEvents, participantEvents });
   } catch (error) {
     next(error);
   }
@@ -96,7 +95,13 @@ export const deleteMyEvent = async (
 
     const updatedEvents = await Event.find();
 
-    res.status(200).json(updatedEvents);
+    const hostedEvents = await Event.find({ hostId: req.auth.userId });
+
+    const participantEvents = await Event.find({
+      participants: { $elemMatch: { userId: req.auth.userId } },
+    });
+
+    res.status(200).json({ updatedEvents, hostedEvents, participantEvents });
   } catch (error) {
     next(error);
   }
@@ -147,7 +152,13 @@ export const subToEvent = async (
 
     const sortedEvents = [...hostedEvents, ...otherEvents];
 
-    res.status(200).json(sortedEvents);
+    const newHostedEvents = await Event.find({ hostId: req.auth.userId });
+
+    const participantEvents = await Event.find({
+      participants: { $elemMatch: { userId: req.auth.userId } },
+    });
+
+    res.status(200).json({ sortedEvents, newHostedEvents, participantEvents });
   } catch (error) {
     next(error);
   }
