@@ -6,6 +6,7 @@ export interface PostSchema {
   img: string;
   likes: { userId: string }[];
   comments: { userId: string; text: string }[];
+  createdAt: Date;
 }
 
 export const postSchema = new mongoose.Schema<PostSchema>({
@@ -26,6 +27,10 @@ export const postSchema = new mongoose.Schema<PostSchema>({
   comments: {
     type: [{ userId: String, text: String }],
     default: [],
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
   },
 });
 

@@ -3,6 +3,7 @@ import Post from "../models/Post";
 import User from "../models/User";
 import { log } from "console";
 import mongoose from "mongoose";
+import { deleteImageFromCloudinary } from "./event";
 
 export interface AuthenticatedRequest extends Request {
   auth: {
@@ -14,6 +15,7 @@ interface postSchema {
   userId: string;
   content?: string;
   img?: string;
+  createdAt: number;
 }
 
 export const createPost = async (
@@ -34,6 +36,7 @@ export const createPost = async (
       userId: req.auth.userId,
       content,
       img,
+      createdAt: Date.now(),
     });
 
     await post.save();
@@ -148,18 +151,21 @@ export const getPostComments: RequestHandler = async (req, res, next) => {
 };
 
 export const getUserPosts: RequestHandler = async (req, res, next) => {
-  console.log("executing the function");
-
   try {
     const { userId } = req.params;
 
-    const userPosts = await Post.find({ userId: userId });
+    const userPosts = await Post.find({ userId: userId }).sort({
+      createdAt: -1,
+    });
 
     if (userPosts) {
       res.status(200).json(userPosts);
+    } else {
+      res.status(404).json({ message: "No posts found" });
     }
   } catch (err) {
     console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -171,18 +177,17 @@ export const getSessionPosts = async (
   console.log("executing the function 2 times ago");
 
   try {
-    console.log("entring the try block");
-
     const userId = req.auth.userId;
 
-    console.log("executing here");
-    console.log(userId);
+    const userPosts = await Post.find({ userId: userId }).sort({
+      createdAt: -1,
+    });
 
-    const userData = await Post.find({ userId: userId });
-
-    console.log(userData);
-
-    res.status(200).json(userData);
+    if (userPosts) {
+      res.status(200).json(userPosts);
+    } else {
+      res.status(404).json({ message: "No posts found" });
+    }
   } catch (err) {
     console.error(err);
   }
@@ -232,7 +237,16 @@ export const deletePost = async (
 ) => {
   try {
     const { postId } = req.params;
+    const post = await Post.findById(postId);
     const userId = req.auth.userId;
+
+    if (!post) {
+      return res.status(403).json({ message: "This post doesn't exist." });
+    }
+
+    if (post.img) {
+      await deleteImageFromCloudinary(post.img);
+    }
 
     await Post.findByIdAndDelete(postId);
 
