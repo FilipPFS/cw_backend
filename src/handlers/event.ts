@@ -19,7 +19,7 @@ export const createEvent = async (
 
     if (!title || !description || !coverImg) {
       return res.status(400).json({
-        message: "Event needs to have a title",
+        message: "Vous devez ajouter un titre, une image et une description.",
       });
     }
 

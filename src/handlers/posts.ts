@@ -96,7 +96,13 @@ export const addLikeToPost = async (
 
     const likedPosts = await getPostsByIds(likedPostIds);
 
-    res.status(201).json({ posts: allPosts, liked: likedPosts });
+    const userPosts = await Post.find({ userId: req.auth.userId }).sort({
+      createdAt: -1,
+    });
+
+    res
+      .status(201)
+      .json({ posts: allPosts, liked: likedPosts, userPosts: userPosts });
   } catch (error) {
     next(error);
   }
