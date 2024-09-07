@@ -4,6 +4,7 @@ import {
   addNewComment,
   createPost,
   deletePost,
+  getFriendPosts,
   getLikedPosts,
   getPostComments,
   getPosts,
@@ -16,7 +17,7 @@ import { getSessionUser } from "../handlers/users";
 const express = require("express");
 const router: Router = express.Router();
 
-router.get("/", getPosts);
+router.get("/", authMiddleware, getPosts as unknown as RequestHandler);
 router.post("/", authMiddleware, createPost as unknown as RequestHandler);
 router.post(
   "/:postId",
@@ -38,6 +39,11 @@ router.get(
   "/likedPosts",
   authMiddleware,
   getLikedPosts as unknown as RequestHandler
+);
+router.get(
+  "/friends",
+  authMiddleware,
+  getFriendPosts as unknown as RequestHandler
 );
 router.get("/:userId", getUserPosts);
 router.delete(

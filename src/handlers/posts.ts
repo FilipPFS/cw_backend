@@ -47,13 +47,44 @@ export const createPost = async (
   }
 };
 
-export const getPosts: RequestHandler = async (req, res, next) => {
+export const getPosts = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const allPosts = await Post.find();
+    const userId = req.auth.userId;
+
+    const allPosts = await Post.find({ userId: { $ne: userId } });
 
     res.status(200).json(allPosts);
   } catch (err) {
     console.error(err);
+    res.status(500).json({ message: "Server error", error: err });
+  }
+};
+
+export const getFriendPosts = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.auth.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const friends = user.friends;
+
+    const friendPosts = await Post.find({ userId: { $in: friends } });
+
+    res.status(200).json(friendPosts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err });
   }
 };
 
