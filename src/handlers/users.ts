@@ -113,3 +113,71 @@ export const changeUserInfos = async (
     console.error(err);
   }
 };
+
+export const getSessionFriends = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const sessionUserId = req.auth.userId;
+
+    const userData = await User.findById(sessionUserId);
+
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const friendIds = userData.friends || [];
+
+    const friends = await Promise.all(
+      friendIds.map(async (friendId) => {
+        return await User.findById(friendId);
+      })
+    );
+
+    res.status(200).json(friends);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err });
+  }
+};
+
+export const deleteFriend = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const sessionUserId = req.auth.userId;
+    const { friendId } = req.params;
+
+    const userData = await User.findById(sessionUserId);
+    const friendUser = await User.findById(friendId);
+
+    if (!userData || !friendUser) {
+      return res.status(404).json({ message: "User or friend not found" });
+    }
+
+    userData.friends = userData.friends.filter(
+      (friend) => friend.toString() !== friendId
+    );
+    friendUser.friends = friendUser.friends.filter(
+      (friend) => friend.toString() !== sessionUserId
+    );
+
+    await userData.save();
+    await friendUser.save();
+
+    const friends = await Promise.all(
+      userData.friends.map(async (friendId) => {
+        return await User.findById(friendId);
+      })
+    );
+
+    res.status(200).json(friends);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err });
+  }
+};

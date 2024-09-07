@@ -3,6 +3,8 @@ import {
   changeUserAvatar,
   changeUserBanner,
   changeUserInfos,
+  deleteFriend,
+  getSessionFriends,
   getSessionUser,
   getSingleUser,
   getUsers,
@@ -19,6 +21,11 @@ router.get(
   authMiddleware,
   getSessionUser as unknown as RequestHandler
 );
+router.get(
+  "/friends",
+  authMiddleware,
+  getSessionFriends as unknown as RequestHandler
+);
 router.get("/:userId", getSingleUser);
 router.post(
   "/avatar",
@@ -29,6 +36,11 @@ router.post(
   "/banner",
   authMiddleware,
   changeUserBanner as unknown as RequestHandler
+);
+router.put(
+  "/delete/:friendId",
+  authMiddleware,
+  deleteFriend as unknown as RequestHandler
 );
 router.put(
   "/personal-infos",
