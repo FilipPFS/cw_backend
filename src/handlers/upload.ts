@@ -7,7 +7,7 @@ export const uploadImage = async (
   next: NextFunction
 ) => {
   try {
-    const { img } = req.body;
+    const { img } = req.body as { img: string };
 
     if (!img) {
       return res.status(400).json({ error: "No image provided" });
@@ -23,7 +23,7 @@ export const uploadImage = async (
     if (!res.headersSent) {
       res.status(500).json({ error: "Failed to upload image" });
     } else {
-      next(error); // Forward to the next error handler if headers are already sent
+      next(error);
     }
   }
 };
@@ -34,7 +34,7 @@ export const uploadEvent = async (
   next: NextFunction
 ) => {
   try {
-    const { img } = req.body;
+    const { img } = req.body as { img: string };
 
     if (!img) {
       return res.status(400).json({ error: "No image provided" });
@@ -50,7 +50,7 @@ export const uploadEvent = async (
     if (!res.headersSent) {
       res.status(500).json({ error: "Failed to upload image" });
     } else {
-      next(error); // Forward to the next error handler if headers are already sent
+      next(error);
     }
   }
 };
@@ -61,7 +61,7 @@ export const uploadAvatar = async (
   next: NextFunction
 ) => {
   try {
-    const { img } = req.body;
+    const { img } = req.body as { img: string };
 
     if (!img) {
       return res.status(400).json({ error: "No image provided" });
@@ -77,7 +77,7 @@ export const uploadAvatar = async (
     if (!res.headersSent) {
       res.status(500).json({ error: "Failed to upload image" });
     } else {
-      next(error); // Forward to the next error handler if headers are already sent
+      next(error);
     }
   }
 };

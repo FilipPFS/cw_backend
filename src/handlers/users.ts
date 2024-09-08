@@ -50,7 +50,7 @@ export const changeUserAvatar = async (
 ) => {
   try {
     const sessionUserId = req.auth.userId;
-    const { img } = req.body;
+    const { img } = req.body as { img: string };
 
     const userData = await User.findById(sessionUserId);
 
@@ -96,7 +96,11 @@ export const changeUserInfos = async (
 ) => {
   try {
     const sessionUserId = req.auth.userId;
-    const { firstName, lastName, description } = req.body;
+    const { firstName, lastName, description } = req.body as {
+      firstName: string;
+      lastName: string;
+      description: string;
+    };
 
     const userData = await User.findById(sessionUserId);
 

@@ -150,19 +150,16 @@ export const checkRequest = async (
       receiverId: req.auth.userId,
     });
 
-    // Check if both requests are empty
     if (!myRequest && !userRequest) {
       return res.status(400).json({ message: "Request doesn't exist." });
     }
 
-    // If a request from the current user exists
     if (myRequest) {
       return res
         .status(200)
         .json({ sentRequest: true, friendRequest: myRequest });
     }
 
-    // If a request from the other user exists
     if (userRequest) {
       return res
         .status(200)

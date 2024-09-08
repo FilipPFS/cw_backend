@@ -8,14 +8,15 @@ export interface AuthenticatedRequest extends Request {
   };
 }
 
-interface Message {
+interface IMessage {
   senderId: string;
   receiverId: string;
   content: string;
+  date: Date;
 }
 
 type GroupedMessages = {
-  [key: string]: Message[];
+  [key: string]: IMessage[];
 };
 
 export const sendMessage = async (
@@ -34,7 +35,7 @@ export const sendMessage = async (
         .json({ message: "There is no content in your message" });
     }
 
-    const newMessage = new Message({
+    const newMessage = new Message<IMessage>({
       senderId,
       receiverId,
       content,
@@ -85,14 +86,12 @@ export const getUserMessages = async (
   try {
     const userId = req.auth.userId;
 
-    // Fetch messages where the user is either the sender or receiver
-    const messages: Message[] = await Message.find({
+    const messages: IMessage[] = await Message.find({
       $or: [{ senderId: userId }, { receiverId: userId }],
-    }).sort({ date: -1 }); // Sort messages by date in descending order (most recent first)
+    }).sort({ date: -1 });
 
     const groupedMessages: GroupedMessages = {};
 
-    // Group the messages by sender and receiver
     messages.forEach((message) => {
       const key = [message.senderId, message.receiverId].sort().join("_");
 
@@ -103,7 +102,6 @@ export const getUserMessages = async (
       groupedMessages[key].push(message);
     });
 
-    // Reverse each group's array so the last message is at the end
     Object.keys(groupedMessages).forEach((key) => {
       groupedMessages[key].reverse();
     });

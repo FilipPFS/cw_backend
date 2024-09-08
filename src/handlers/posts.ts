@@ -41,7 +41,13 @@ export const createPost = async (
 
     await post.save();
 
-    res.status(201).json({ message: "Post created successfully." });
+    const posts = await Post.find({ userId: { $ne: req.auth.userId } }).sort({
+      createdAt: -1,
+    });
+
+    const allPosts = [post, ...posts];
+
+    res.status(201).json(allPosts);
   } catch (error) {
     next(error);
   }
@@ -153,7 +159,7 @@ export const addNewComment = async (
 
     const { postId } = req.params;
     const userCommentId = req.auth.userId;
-    const { comment } = req.body;
+    const { comment } = req.body as { comment: string };
 
     if (!comment) {
       return res
@@ -235,10 +241,8 @@ export const getSessionPosts = async (
 };
 
 const getPostsByIds = async (postIds: string[]) => {
-  // Ensure postIds are valid MongoDB ObjectIds
   const objectIds = postIds.map((id) => new mongoose.Types.ObjectId(id));
 
-  // Fetch posts from the database
   return Post.find({ _id: { $in: objectIds } }).exec();
 };
 
@@ -248,20 +252,18 @@ export const getLikedPosts = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.auth.userId; // Adjust according to your request object
-    const user = await User.findById(userId); // Fetch the user from the database
+    const userId = req.auth.userId;
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    const likedPostIds = user.likedPosts; // Assuming this is an array of strings (post IDs)
+    const likedPostIds = user.likedPosts;
 
     if (!likedPostIds || likedPostIds.length === 0) {
-      return res.status(200).json([]); // Return an empty array if no liked posts
+      return res.status(200).json([]);
     }
-
-    // Get posts by IDs
     const likedPosts = await getPostsByIds(likedPostIds);
 
     res.status(200).json(likedPosts);

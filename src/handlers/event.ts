@@ -9,6 +9,14 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
+interface EventSchema {
+  hostId: string;
+  title: string;
+  description: string;
+  coverImg: string;
+  createdAt: number;
+}
+
 export const createEvent = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -23,7 +31,7 @@ export const createEvent = async (
       });
     }
 
-    const event = new Event({
+    const event = new Event<EventSchema>({
       hostId: req.auth.userId,
       title,
       description,
