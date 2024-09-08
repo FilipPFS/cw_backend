@@ -55,7 +55,9 @@ export const getPosts = async (
   try {
     const userId = req.auth.userId;
 
-    const allPosts = await Post.find({ userId: { $ne: userId } });
+    const allPosts = await Post.find({ userId: { $ne: userId } }).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json(allPosts);
   } catch (err) {
@@ -79,7 +81,9 @@ export const getFriendPosts = async (
 
     const friends = user.friends;
 
-    const friendPosts = await Post.find({ userId: { $in: friends } });
+    const friendPosts = await Post.find({ userId: { $in: friends } }).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json(friendPosts);
   } catch (err) {
